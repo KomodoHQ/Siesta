@@ -30,16 +30,16 @@ trait Siesta
             $results[] = new self($result);
         }
 
-        return $response['result'];
+        return $results;
     }
 
     public static function findOne($queryParams, $endpoint = NULL)
     {
         $queryParams['limit'] = 1;
 
-        $response = $this->find($queryParams,$endpoint);
+        $results = $this->find($queryParams,$endpoint);
 
-        return $response[0];
+        return $results[0];
     }
 
     public static function findById($id, $endpoint = NULL)
@@ -52,7 +52,9 @@ trait Siesta
 
         $response = $this->client->get('/' . $endpoint . "/" . $id);
 
-        return $response;
+        $response = self::readBody($response);
+
+        return new self($response);
     }
 
     public static function create($data, $endpoint = NULL)

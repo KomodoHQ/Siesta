@@ -80,4 +80,26 @@ class SiestaContext extends BehatContext {
           assertEquals(count($this->output), $length);
       }
 
+    /**
+     * @Then /^the items should be instances of "([^"]*)"$/
+     */
+     public function itemsShouldBeInstancesOf($klass)
+     {
+        foreach ($this->output as $item) {
+            assertEquals(get_class($item),$klass);
+        }
+
+     }
+
+    /**
+     * @Then /^the results' "([^"]*)" properties should equal:$/
+     */
+     public function propertiesShouldEqual($prop,PyStringNode $values)
+     {
+         $values = explode("\n",$values);
+
+         for ($i = 0; $i < count($this->output); $i++) {
+             assertEquals($this->output[$i]->$prop,$values[$i]);
+         }
+     }
 }

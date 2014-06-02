@@ -22,4 +22,10 @@ Feature: siesta
     Scenario: Call find() method
         When I call static method "find"
         Then the response should be a "array"
-        And the length should be "2"
+            And the length should be "2"
+            And the items should be instances of "User"
+            And the results' "name" properties should equal:
+                """
+                Will McKenzie
+                Alan Mitchell
+                """
