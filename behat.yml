@@ -2,7 +2,7 @@ default:
   context:
     parameters:
       # URL to use against the web server in the features
-      url: http://localhost:8888
+      url: http://localhost:9999
 
       # Path to the document root
       documentRoot: tests/
