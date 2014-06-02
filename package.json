@@ -1,0 +1,8 @@
+{
+  "require": {},
+  "devDependencies": {
+    "gulp": "^3.6.2",
+    "gulp-notify": "^1.2.5",
+    "gulp-phpunit": "^0.5.1"
+  }
+}
