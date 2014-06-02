@@ -1,31 +1,28 @@
 {
-    "name": "quickjob/siesta",
-    "description": "",
+    "name": "komodohq/siesta",
+    "description": "REST API Consumption Wrapper for PHP",
     "authors": [
         {
-            "name": "OiNutter",
-            "email": "willmckenzie@oinutter.co.uk"
+            "name": "Will McKenzie",
+            "email": "will@komododigital.co.uk"
         }
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/support": "4.1.*",
-        "quickjob/loader": "dev-master"
+        "guzzlehttp/guzzle": "4.*"
     },
     "require-dev": {
-        "phpunit/phpunit": "3.7.*@dev",
+        "phpunit/phpunit": "3.7.*",
+        "behat/behat": "2.4.*@stable",
         "mockery/mockery": "*@stable"
     },
     "autoload": {
         "psr-4": {
-            "Quickjob\\Siesta\\": "src/"
+            "KomodoHQ\\Siesta\\": "src/"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://repsatis.quickjob.com.br/"
-        }
-    ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "bin-dir": "bin/"
+    }
 }
