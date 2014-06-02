@@ -23,12 +23,21 @@ $users = [
 			]
 	];
 
+$matches;
 
 if (preg_match('/^\/users$/', $_SERVER["REQUEST_URI"])) {
 
 	switch ($verb) {
 		case 'get':
 			output($users);
+			break;
+	}
+
+} else if (preg_match('/^\/users\/([0-9]+)$/', $_SERVER["REQUEST_URI"],$matches)) {
+
+	switch ($verb) {
+		case 'get':
+			output($users[$matches[1]]);
 			break;
 	}
 

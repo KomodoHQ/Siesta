@@ -21,7 +21,7 @@ Feature: siesta
 
     Scenario: Call find() method
         When I call static method "find"
-        Then the response should be a "array"
+        Then the response should be an "array"
             And the length should be "2"
             And the items should be instances of "User"
             And the results' "name" properties should equal:
@@ -29,3 +29,16 @@ Feature: siesta
                 Will McKenzie
                 Alan Mitchell
                 """
+
+    Scenario: Call findOne() method
+        When I call static method "findOne"
+        Then the item should be an instance of "User"
+            And the item's "name" property should equal "Will McKenzie"
+
+    Scenario: Call findById() method
+        When I call static method "findById" with arguments:
+        """
+        [1]
+        """
+        Then the item should be an instance of "User"
+            And the item's "name" property should equal "Alan Mitchell"

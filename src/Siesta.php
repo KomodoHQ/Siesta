@@ -33,32 +33,28 @@ trait Siesta
         return $results;
     }
 
-    public static function findOne($queryParams, $endpoint = NULL)
+    public static function findOne($queryParams = [], $endpoint = NULL)
     {
         $queryParams['limit'] = 1;
 
-        $results = $this->find($queryParams,$endpoint);
+        $results = self::find($queryParams,$endpoint);
 
         return $results[0];
     }
 
     public static function findById($id, $endpoint = NULL)
     {
-        if(!$this->client) {
-            self::setupClient();
-        }
+        $endpoint = $endpoint ?: self::SIESTA_ENDPOINT;
 
-        $endpoint = $endpoint || $this->SIESTA_ENDPOINT;
-
-        $response = $this->client->get('/' . $endpoint . "/" . $id);
+        $response = GuzzleHttp\get(self::SIESTA_URL . '/' . $endpoint . "/"  . (string)$id);
 
         $response = self::readBody($response);
 
-        return new self($response);
+        return new self($response['result']);
     }
 
     public static function create($data, $endpoint = NULL)
-    {
+    {        
 
     }
 
