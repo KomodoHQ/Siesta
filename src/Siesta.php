@@ -118,7 +118,7 @@ trait Siesta
         if (!self::$client)
             self::siestaSetup();
 
-        $data = $data ?: self::siestaToArray();
+        $data = $data ?: $this->toArray();
 
         $idProperty = self::$siestaConfig["idProperty"];
 
@@ -166,6 +166,11 @@ trait Siesta
 
     }
 
+    public function toArray()
+    {
+        return get_object_vars($this);
+    }
+
     /******************
      * Private Methods *
      ******************/
@@ -206,8 +211,4 @@ trait Siesta
         }
     }
 
-    private function siestaToArray()
-    {
-        return get_object_vars($this);
-    }
 }
