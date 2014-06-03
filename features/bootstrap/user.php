@@ -4,7 +4,7 @@ include ("src/Siesta.php");
 
 class User {
 
-    use Siesta;
+    use Siesta\Siesta;
 
     private static $siestaConfig = [
             "url" => "http://localhost:9999",

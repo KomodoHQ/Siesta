@@ -1,5 +1,7 @@
 <?php
 
+namespace Siesta;
+
 /**
  * Collection of methods that map to REST API calls
  *

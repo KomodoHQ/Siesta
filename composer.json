@@ -17,8 +17,8 @@
         "mockery/mockery": "*@stable"
     },
     "autoload": {
-        "psr-4": {
-            "KomodoHQ\\Siesta\\": "src/"
+        "psr-0": {
+            "Siesta\\": "src/"
         }
     },
     "minimum-stability": "dev",
