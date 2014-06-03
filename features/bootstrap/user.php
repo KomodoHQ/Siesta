@@ -6,12 +6,14 @@ class User {
 
     use Siesta;
 
-    const SIESTA_URL = "http://localhost:9999";
-    const SIESTA_ENDPOINT = "users";
+    private static $siestaConfig = [
+            "url" => "http://localhost:9999",
+            "endpoint" => "users"
+        ];
 
     function __construct($data)
     {
-        $this->_id = $data['id'];
+        $this->id = $data['id'];
         $this->name = $data['name'];
         $this->email = $data['email'];
     }

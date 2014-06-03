@@ -36,4 +36,12 @@ class FeatureContext extends BehatContext
         $this->useContext('SiestaContext', new SiestaContext($parameters));
     }
 
+    /**
+     * @BeforeSuite
+     */
+    public static function prepare(SuiteEvent $event)
+    {
+        GuzzleHttp\get('http://localhost:9999/reset');
+    }
+
 }

@@ -12,11 +12,15 @@ require_once 'PHPUnit/Framework/Assert/Functions.php';
 class SiestaContext extends BehatContext {
 
     /**
-     * @Given /^I have a class that extends Siesta$/
+     * @Given /^I have an instance of "([^"]*)" that extends Siesta$/
      */
-    public function iHaveAClass($argument)
+    public function iHaveAClass($klass)
     {
-        $this->class = new User();
+        $this->klass = new $klass([
+                "id" => 0,
+                "name" => "Will McKenzie",
+                "email" => "will@komododigital.co.uk"
+            ]);
     }
 
     /**
@@ -58,8 +62,8 @@ class SiestaContext extends BehatContext {
      */
     public function iCallStaticWithArguments($method,$arguments)
     {
-        $arguments = json_decode($arguments);
-
+        $arguments = str_replace("'","\"",$arguments);
+        $arguments = json_decode($arguments,true);
         $this->output = call_user_func_array(["User",$method],$arguments);
     }
 
@@ -68,7 +72,17 @@ class SiestaContext extends BehatContext {
      */
     public function iCallInstance($method)
     {
-        $this->output = $this->class->$method();
+        $this->output = $this->klass->$method();
+    }
+
+    /**
+     * @When /^I call instance method "([^"]*)" with arguments:$/
+     */
+    public function iCallInstanceWithArguments($method,$arguments)
+    {
+        $arguments = str_replace("'","\"",$arguments);
+        $arguments = json_decode($arguments,true);
+        $this->output = call_user_func_array([$this->klass,$method],$arguments);
     }
 
     /**
@@ -116,7 +130,7 @@ class SiestaContext extends BehatContext {
         $values = explode("\n",$values);
 
         for ($i = 0; $i < count($this->output); $i++) {
-            assertEquals($this->output[$i]->$prop,$values[$i]);
+            assertEquals($values[$i],$this->output[$i]->$prop);
         }
     }
 
@@ -125,6 +139,22 @@ class SiestaContext extends BehatContext {
      */
     public function propertyShouldEqual($prop,$value)
     {
-        assertEquals($this->output->$prop,$value);
+        assertEquals($value,$this->output->$prop);
+    }
+
+    /**
+     * @Then /^the item's "([^"]*)" key should equal "([^"]*)"$/
+     */
+    public function keyShouldEqual($prop,$value)
+    {
+        assertEquals($value,$this->output[$prop]);
+    }
+
+    /**
+     * @When /^I set the "([^"]*)" property to "([^"]*)"$/
+     */
+    public function setPropertyTo($prop,$value)
+    {
+        $this->klass->$prop = $value;
     }
 }
