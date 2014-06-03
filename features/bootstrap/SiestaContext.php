@@ -100,7 +100,7 @@ class SiestaContext extends BehatContext {
     public function theLengthShouldBe($length)
     {
         $length = (int)$length;
-        assertEquals(count($this->output), $length);
+        assertEquals($length,count($this->output));
     }
 
     /**
