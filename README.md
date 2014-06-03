@@ -106,3 +106,10 @@ public function toArray()
 ```
 
 but you can override that to provide your own serialisation.
+
+
+## TODO
+
+* Error Handling
+* More Tests
+* Tidy up tests
