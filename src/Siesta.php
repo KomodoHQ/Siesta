@@ -2,6 +2,8 @@
 
 namespace Siesta;
 
+use GuzzleHttp;
+
 /**
  * Collection of methods that map to REST API calls
  *
