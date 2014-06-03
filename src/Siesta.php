@@ -1,30 +1,57 @@
 <?php
 
+/**
+ * Collection of methods that map to REST API calls
+ *
+ * Provides common database type methods to a class which map to REST Api CRUD calls, allowing a
+ * REST API to be used as a data source.
+ */
 trait Siesta
 {
     /**********************
      * Private Properties *
      **********************/
+
+    /**
+     * Stores the GuzzleHttp\Client instance used for all requests.
+     */
     private static $client;
 
+
+    /*************************
+     * Public Static Methods *
+     *************************/
+
+    /**
+     * Takes the data from the API and turns it into an instance of the current class.
+     *
+     * @param array $item An associative array representing the JSON decoded data for a single item in the
+     * API response.
+     *
+     * @return class New instance of current class.
+     */
     public static function populate($item)
     {
         return new self($item);
     }
 
     /**
-     * Performs an API GET request to the configured endpoint
+     * Performs an API GET request to the configured endpoint.
      *
      * @param array $queryParams Associative array containing query paramters to be appended to the
-     * API call
-     * @param string $endpoint Alternative endpoint to use in place of the endpoint for the class
+     * API call.
+     * @param array $options Optional configuration for this request. Supported keys are:
      *
-     * @returns array Array of instances of the current class
+     * * endpoint - Overrides the default API endpoint for this request.
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default.
+     *
+     * @return array Array of instances of the current class.
      */
     public static function find($queryParams = [], $options = [])
     {
-        if (!self::$client)
+        if (!self::$client) {
             self::siestaSetup();
+        }
 
         $items = [];
 
@@ -36,8 +63,9 @@ trait Siesta
 
         $token = self::getSiestaOauthToken($options);
 
-        if ($token)
+        if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
+        }
 
         $response = self::$client->send($request);
         $results = self::siestaReadBody($response);
@@ -49,6 +77,18 @@ trait Siesta
         return $items;
     }
 
+    /**
+     * Performs an API GET request to the configured endpoint to get a single result.
+     *
+     * @param array $queryParams Associative array containing query paramters to be appended to the
+     * API call.
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * endpoint - Overrides the default API endpoint for this request.
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default.
+     *
+     * @return class Instance of the current class.
+     */
     public static function findOne($queryParams = [], $options = [])
     {
         $queryParams['limit'] = 1;
@@ -58,10 +98,22 @@ trait Siesta
         return $results[0];
     }
 
+    /**
+     * Performs an API GET request to the configured endpoint for a specific result
+     *
+     * @param string|int $id id of resource you wish to retrieve
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * endpoint - Overrides the default API endpoint for this request
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default
+     *
+     * @return class Instance of the current class that represents the requested resource.
+     */
     public static function findById($id, $options = [])
     {
-        if (!self::$client)
+        if (!self::$client) {
             self::siestaSetup();
+        }
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
 
@@ -69,8 +121,9 @@ trait Siesta
 
         $token = self::getSiestaOauthToken($options);
 
-        if ($token)
+        if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
+        }
 
         $response = self::$client->send($request);
 
@@ -79,10 +132,24 @@ trait Siesta
         return self::populate($result);
     }
 
+    /**
+     * Performs an API POST request to the configured endpoint to create a new resource with the
+     * supplied data.
+     *
+     * @param array $data Associative array containing the data to send to the API to create a new
+     * resource with.
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * endpoint - Overrides the default API endpoint for this request
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default
+     *
+     * @return class Instance of the current class that represents the newly created resource.
+     */
     public static function create($data, $options = [])
     {
-        if (!self::$client)
+        if (!self::$client) {
             self::siestaSetup();
+        }
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
 
@@ -95,8 +162,9 @@ trait Siesta
 
         $token = self::getSiestaOauthToken($options);
 
-        if ($token)
+        if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
+        }
 
         $response = self::$client->send($request);
         $result = self::siestaReadBody($response);
@@ -105,18 +173,46 @@ trait Siesta
 
     }
 
-    /******************
-     * Instance Methods *
-     ******************/
+    /***************************
+     * Public Instance Methods *
+     ***************************/
+
+    /**
+     * Alias method for save. Only difference is the $data param is required.
+     *
+     * @see save()
+     *
+     * @param array|null $data Associative array containing the data to send to the API to update the
+     * resource with. If not supplied Siesta will call its toArray() method to serialize the current
+     * instance.
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default
+     *
+     */
     public function update($data, $options = [])
     {
         return $this->save($data,$options);
     }
 
-    public function save($data = NULL,$options = [])
+    /**
+     * Performs an API PUT request to the configured endpoint to update a resource with the new
+     * properties.
+     *
+     * @param array|null $data Associative array containing the data to send to the API to update the
+     * resource with. If not supplied Siesta will call its toArray() method to serialize the current
+     * instance.
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default
+     *
+     * @return class The current instance of the class.
+     */
+    public function save($data = null,$options = [])
     {
-        if (!self::$client)
+        if (!self::$client) {
             self::siestaSetup();
+        }
 
         $data = $data ?: $this->toArray();
 
@@ -131,34 +227,47 @@ trait Siesta
 
         $token = self::getSiestaOauthToken($options);
 
-        if ($token)
+        if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
+        }
 
         $response = self::$client->send($request);
         $result = self::siestaReadBody($response);
 
         foreach ($data as $key => $value) {
-            if(array_key_exists($key,$result))
+            if(array_key_exists($key,$result)) {
                 $this->$key = $result[$key];
+            }
         }
 
         return $this;
 
     }
 
+    /**
+     * Performs an API DELETE request to the configured endpoint to delete a resource.
+     *
+     * @param array $options Optional configuration for this request. Supported keys are:
+     *
+     * * token - Specifies the OAuth Token to use for this request. Uses the $_SESSION one by default
+     *
+     * @return array The API response.
+     */
     public function delete($options = [])
     {
 
-        if (!self::$client)
+        if (!self::$client) {
             self::siestaSetup();
+        }
 
         $idProperty = self::$siestaConfig["idProperty"];
         $request = self::$client->createRequest('DELETE','/' . self::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
 
         $token = self::getSiestaOauthToken($options);
 
-        if ($token)
+        if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
+        }
 
         $response = self::$client->send($request);
 
@@ -166,19 +275,28 @@ trait Siesta
 
     }
 
+    /**
+     * Serializes the current instance's properties into an array.
+     *
+     * @return array The serialized class
+     */
     public function toArray()
     {
         return get_object_vars($this);
     }
 
-    /******************
-     * Private Methods *
-     ******************/
+    /**************************
+     * Private Static Methods *
+     **************************/
 
+    /**
+     * Sets up the GuzzleHttp\Client instance and extends the default config with the new values
+     * specified in the class.
+     */
     private static function siestaSetup()
     {
         self::$siestaConfig = array_merge([
-            "url" => NULL,
+            "url" => null,
             "endpoint" => "",
             "idProperty" => "id",
             "resultField" => "result",
@@ -186,13 +304,21 @@ trait Siesta
             "requestContentType" => "application/json"
         ],self::$siestaConfig ?: []);
 
-        if (!self::$siestaConfig["url"])
+        if (!self::$siestaConfig["url"]) {
             throw new Exception("You Must Specify A URL For The API!");
+        }
 
         self::$client = new GuzzleHttp\Client(["base_url" => self::$siestaConfig["url"]]);
 
     }
 
+    /**
+     * Extracts the results of the API query from the GuzzleHttp\Stream
+     *
+     * @param GuzzleHttp\Stream $response The response from an API request.
+     *
+     * @return array The results of the request
+     */
     private static function siestaReadBody($response)
     {
         $obj = json_decode((string)$response->getBody(),true);
@@ -200,6 +326,13 @@ trait Siesta
         return (self::$siestaConfig["resultField"]) ? $obj[self::$siestaConfig["resultField"]] : $obj;
     }
 
+    /**
+     * Checks all the possible places and finds the OAuth Token to use for a request
+     *
+     * @param array $options The array of options passed to the request method
+     *
+     * @return string|null The OAuth Token to use for the request
+     */
     private static function getSiestaOauthToken($options = [])
     {
         if (array_key_exists('token',$options)) {
@@ -207,7 +340,7 @@ trait Siesta
         } else if (isset($_SESSION) && array_key_exists(self::$config['tokenField'],$_SESSION)) {
             return $_SESSION[self::$config['tokenField']];
         } else {
-            return NULL;
+            return null;
         }
     }
 
