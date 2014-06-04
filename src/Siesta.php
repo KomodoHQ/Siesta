@@ -334,9 +334,21 @@ trait Siesta
      */
     private static function siestaReadBody($response)
     {
+        // Check for errors
+        self::siestaCheckResponseForErrors($response);
+
         $obj = json_decode((string)$response->getBody(),true);
 
         return (self::$siestaConfig["resultField"]) ? $obj[self::$siestaConfig["resultField"]] : $obj;
+    }
+
+    private static function siestaCheckResponseForErrors($response)
+    {
+        $statusCode = $response->getStatusCode();
+        if ($statusCode != 200) {
+            throw new \Exception("Got " . $statusCode . ": " . $response->getReasonPhrase());
+        }
+
     }
 
     /**
