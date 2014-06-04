@@ -315,7 +315,7 @@ trait Siesta
              * inadequate closure implementation
              */
             if(class_exists('Config') && is_callable(['\Config','get']) && \Config::get('api.url')) {
-                self::$siestaConfig["url"] = Config::get('api.url');
+                self::$siestaConfig["url"] = \Config::get('api.url');
             } else {
                 throw new Exception("You Must Specify A URL For The API!");
             }
