@@ -309,7 +309,16 @@ trait Siesta
         ],self::$siestaConfig ?: []);
 
         if (!self::$siestaConfig["url"]) {
-            throw new Exception("You Must Specify A URL For The API!");
+
+            /**
+             * If we're in Laravel environment get the url from the Config. Workaround for PHP's
+             * inadequate closure implementation
+             */
+            if(isset(Config) && Config::get('api.url')) {
+                self::$siestaConfig["url"] = Config::get('api.url');
+            } else {
+                throw new Exception("You Must Specify A URL For The API!");
+            }
         }
 
         self::$client = new GuzzleHttp\Client(["base_url" => self::$siestaConfig["url"]]);
