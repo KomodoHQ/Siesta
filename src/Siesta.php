@@ -5,6 +5,20 @@ namespace Siesta;
 use GuzzleHttp;
 
 /**
+ * Custom Exception class for when an HTTP Status Code other than 200 is returned
+ */
+class SiestaStatusCodeException extends \Exception
+{
+}
+
+/**
+ * Custom Exception class for any general erros
+ */
+class SiestaGeneralException extends \Exception
+{
+}
+
+/**
  * Collection of methods that map to REST API calls
  *
  * Provides common database type methods to a class which map to REST Api CRUD calls, allowing a
@@ -99,7 +113,7 @@ trait Siesta
 
         $results = self::find($queryParams,$options);
 
-        return $results[0];
+        return (count($results) >= 1) ? $results[0] : null;
     }
 
     /**
@@ -133,7 +147,7 @@ trait Siesta
 
         $result = self::siestaReadBody($response);
 
-        return self::populate($result);
+        return ($result) ? self::populate($result) : null;
     }
 
     /**
@@ -334,19 +348,26 @@ trait Siesta
      */
     private static function siestaReadBody($response)
     {
-        // Check for errors
-        self::siestaCheckResponseForErrors($response);
-
         $obj = json_decode((string)$response->getBody(),true);
+
+        // Check for errors
+        self::siestaCheckResponseForErrors($response,$obj);
 
         return (self::$siestaConfig["resultField"]) ? $obj[self::$siestaConfig["resultField"]] : $obj;
     }
 
-    private static function siestaCheckResponseForErrors($response)
+    private static function siestaCheckResponseForErrors($response,$parsed)
     {
         $statusCode = $response->getStatusCode();
-        if ($statusCode != 200) {
-            throw new \Exception("Got " . $statusCode . ": " . $response->getReasonPhrase());
+        if ($statusCode != 200 || (array_key_exists('code',$parsed) && $parsed['code'] != 200)) {
+            $message = array_key_exists('error',$parsed) ? $parsed['error'] : $response->getReasonPhrase();
+            throw new SiestaStatusCodeException($message, $statusCode);
+        }
+
+        $result = (self::$siestaConfig["resultField"]) ? $parsed[self::$siestaConfig["resultField"]] : $parsed;
+
+        if ($result == null) {
+            throw new SiestaGeneralException("No Result Received");
         }
 
     }
