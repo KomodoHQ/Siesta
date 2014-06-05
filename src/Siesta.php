@@ -2,26 +2,45 @@
 
 namespace Siesta;
 
-use GuzzleHttp;
+use GuzzleHttp,
+    GuzzleHttp\Exception\ClientException,
+    GuzzleHttp\Exception\ServerException;
+
+/**
+ * Custom Exception class for any general erros
+ */
+class SiestaGeneralException extends \Exception
+{
+
+    /**
+     * Assoc array representing the JSON response from the server
+     */
+    protected $response;
+
+    public function __construct($message = null, $code = 0, $e = null)
+    {
+        parent::__construct($message,$code,$e);
+        $this->response = json_decode((string)$e->getResponse()->getBody(),true);
+    }
+
+    final public function getResponse()
+    {
+        return $this->response;
+    }
+
+}
 
 /**
  * Custom Exception class for when an HTTP Status Code in the 400 range is returned
  */
-class SiestaClientException extends \Exception
+class SiestaClientException extends SiestaGeneralException
 {
 }
 
 /**
  * Custom Exception class for when an HTTP Status Code in the 500 range is returned
  */
-class SiestaServerException extends \Exception
-{
-}
-
-/**
- * Custom Exception class for any general erros
- */
-class SiestaGeneralException extends \Exception
+class SiestaServerException extends SiestaGeneralException
 {
 }
 
@@ -103,15 +122,15 @@ trait Siesta
 
         } catch (ClientException $e) {
 
-            throw SiestaClientException($e->message,$e->code);
+            throw new SiestaClientException($e->getMessage(),$e->getCode(),$e);
 
         } catch (ServerException $e) {
 
-            throw SiestaServerException($e->message,$e->code);
+            throw new SiestaServerException($e->getMessage(),$e->getCode(),$e);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            throw SiestaGeneralException($e->message,$e->code);
+            throw new SiestaGeneralException($e->getMessage(),$e->getCode(),$e);
 
         }
 
@@ -181,15 +200,15 @@ trait Siesta
 
         } catch (ClientException $e) {
 
-            throw SiestaClientException($e->message,$e->code);
+            throw new SiestaClientException($e->getMessage(),$e->getCode(),$e);
 
         } catch (ServerException $e) {
 
-            throw SiestaServerException($e->message,$e->code);
+            throw new SiestaServerException($e->getMessage(),$e->getCode(),$e);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            throw SiestaGeneralException($e->message,$e->code);
+            throw new SiestaGeneralException($e->getMessage(),$e->getCode(),$e);
 
         }
 
@@ -242,15 +261,15 @@ trait Siesta
 
         } catch (ClientException $e) {
 
-            throw SiestaClientException($e->message,$e->code);
+            throw new SiestaClientException($e->getMessage(),$e->getCode(),$e);
 
         } catch (ServerException $e) {
 
-            throw SiestaServerException($e->message,$e->code);
+            throw new SiestaServerException($e->getMessage(),$e->getCode(),$e);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            throw SiestaGeneralException($e->message,$e->code);
+            throw new SiestaGeneralException($e->getMessage(),$e->getCode(),$e);
 
         }
 
@@ -327,15 +346,15 @@ trait Siesta
 
         } catch (ClientException $e) {
 
-            throw SiestaClientException($e->message,$e->code);
+            throw new SiestaClientException($e->getMessage(),$e->getCode(),$e);
 
         } catch (ServerException $e) {
 
-            throw SiestaServerException($e->message,$e->code);
+            throw new SiestaServerException($e->getMessage(),$e->getCode(),$e);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            throw SiestaGeneralException($e->message,$e->code);
+            throw new SiestaGeneralException($e->getMessage(),$e->getCode(),$e);
 
         }
 
@@ -384,15 +403,15 @@ trait Siesta
 
         } catch (ClientException $e) {
 
-            throw SiestaClientException($e->message,$e->code);
+            throw new SiestaClientException($e->getMessage(),$e->getCode(),$e);
 
         } catch (ServerException $e) {
 
-            throw SiestaServerException($e->message,$e->code);
+            throw new SiestaServerException($e->getMessage(),$e->getCode(),$e);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
-            throw SiestaGeneralException($e->message,$e->code);
+            throw new SiestaGeneralException($e->getMessage(),$e->getCode(),$e);
 
         }
 
