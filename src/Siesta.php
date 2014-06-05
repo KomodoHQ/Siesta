@@ -5,9 +5,16 @@ namespace Siesta;
 use GuzzleHttp;
 
 /**
- * Custom Exception class for when an HTTP Status Code other than 200 is returned
+ * Custom Exception class for when an HTTP Status Code in the 400 range is returned
  */
-class SiestaStatusCodeException extends \Exception
+class SiestaClientException extends \Exception
+{
+}
+
+/**
+ * Custom Exception class for when an HTTP Status Code in the 500 range is returned
+ */
+class SiestaServerException extends \Exception
 {
 }
 
@@ -85,8 +92,28 @@ trait Siesta
             $request->setHeader('Authorization','Bearer ' . $token);
         }
 
-        $response = self::$client->send($request);
-        $results = self::siestaReadBody($response);
+        /*
+         * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
+         * proofing if we ever replace Guzzle
+         */
+        try {
+
+            $response = self::$client->send($request);
+            $results = self::siestaReadBody($response);
+
+        } catch (ClientException $e) {
+
+            throw SiestaClientException($e->message,$e->code);
+
+        } catch (ServerException $e) {
+
+            throw SiestaServerException($e->message,$e->code);
+
+        } catch (Exception $e) {
+
+            throw SiestaGeneralException($e->message,$e->code);
+
+        }
 
         foreach ($results as $result) {
             $items[] = self::populate($result);
@@ -143,11 +170,31 @@ trait Siesta
             $request->setHeader('Authorization','Bearer ' . $token);
         }
 
-        $response = self::$client->send($request);
+        /*
+         * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
+         * proofing if we ever replace Guzzle
+         */
+        try {
 
-        $result = self::siestaReadBody($response);
+            $response = self::$client->send($request);
+            $result = self::siestaReadBody($response);
+
+        } catch (ClientException $e) {
+
+            throw SiestaClientException($e->message,$e->code);
+
+        } catch (ServerException $e) {
+
+            throw SiestaServerException($e->message,$e->code);
+
+        } catch (Exception $e) {
+
+            throw SiestaGeneralException($e->message,$e->code);
+
+        }
 
         return ($result) ? self::populate($result) : null;
+
     }
 
     /**
@@ -184,8 +231,28 @@ trait Siesta
             $request->setHeader('Authorization','Bearer ' . $token);
         }
 
-        $response = self::$client->send($request);
-        $result = self::siestaReadBody($response);
+        /*
+         * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
+         * proofing if we ever replace Guzzle
+         */
+        try {
+
+            $response = self::$client->send($request);
+            $result = self::siestaReadBody($response);
+
+        } catch (ClientException $e) {
+
+            throw SiestaClientException($e->message,$e->code);
+
+        } catch (ServerException $e) {
+
+            throw SiestaServerException($e->message,$e->code);
+
+        } catch (Exception $e) {
+
+            throw SiestaGeneralException($e->message,$e->code);
+
+        }
 
         return new self($result);
 
@@ -249,8 +316,28 @@ trait Siesta
             $request->setHeader('Authorization','Bearer ' . $token);
         }
 
-        $response = self::$client->send($request);
-        $result = self::siestaReadBody($response);
+        /*
+         * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
+         * proofing if we ever replace Guzzle
+         */
+        try {
+
+            $response = self::$client->send($request);
+            $result = self::siestaReadBody($response);
+
+        } catch (ClientException $e) {
+
+            throw SiestaClientException($e->message,$e->code);
+
+        } catch (ServerException $e) {
+
+            throw SiestaServerException($e->message,$e->code);
+
+        } catch (Exception $e) {
+
+            throw SiestaGeneralException($e->message,$e->code);
+
+        }
 
         foreach ($data as $key => $value) {
             if(array_key_exists($key,$result)) {
@@ -287,7 +374,27 @@ trait Siesta
             $request->setHeader('Authorization','Bearer ' . $token);
         }
 
-        $response = self::$client->send($request);
+        /*
+         * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
+         * proofing if we ever replace Guzzle
+         */
+        try {
+
+            $response = self::$client->send($request);
+
+        } catch (ClientException $e) {
+
+            throw SiestaClientException($e->message,$e->code);
+
+        } catch (ServerException $e) {
+
+            throw SiestaServerException($e->message,$e->code);
+
+        } catch (Exception $e) {
+
+            throw SiestaGeneralException($e->message,$e->code);
+
+        }
 
         return self::siestaReadBody($response);
 
@@ -350,26 +457,7 @@ trait Siesta
     {
         $obj = json_decode((string)$response->getBody(),true);
 
-        // Check for errors
-        self::siestaCheckResponseForErrors($response,$obj);
-
         return (self::$siestaConfig["resultField"]) ? $obj[self::$siestaConfig["resultField"]] : $obj;
-    }
-
-    private static function siestaCheckResponseForErrors($response,$parsed)
-    {
-        $statusCode = $response->getStatusCode();
-        if ($statusCode != 200 || (array_key_exists('code',$parsed) && $parsed['code'] != 200)) {
-            $message = array_key_exists('error',$parsed) ? $parsed['error'] : $response->getReasonPhrase();
-            throw new SiestaStatusCodeException($message, $statusCode);
-        }
-
-        $result = (self::$siestaConfig["resultField"]) ? $parsed[self::$siestaConfig["resultField"]] : $parsed;
-
-        if ($result == null) {
-            throw new SiestaGeneralException("No Result Received");
-        }
-
     }
 
     /**
