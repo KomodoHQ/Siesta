@@ -358,8 +358,8 @@ trait Siesta
 
         }
 
-        foreach ($data as $key => $value) {
-            if(array_key_exists($key,$result)) {
+        foreach ($result as $key => $value) {
+            if(array_key_exists($key,$data)) {
                 $this->$key = $result[$key];
             }
         }
