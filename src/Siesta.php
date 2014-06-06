@@ -492,6 +492,8 @@ trait Siesta
             return $options['token'];
         } else if (isset($_SESSION) && array_key_exists(self::$config['tokenField'],$_SESSION)) {
             return $_SESSION[self::$config['tokenField']];
+        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::get(self::$siestaConfig['tokenField'])) {
+            return \Session::get(self::$siestaConfig['tokenField']);
         } else {
             return null;
         }
