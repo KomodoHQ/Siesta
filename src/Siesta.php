@@ -20,7 +20,9 @@ class SiestaGeneralException extends \Exception
     public function __construct($message = null, $code = 0, $e = null)
     {
         parent::__construct($message,$code,$e);
-        $this->response = json_decode((string)$e->getResponse()->getBody(),true);
+        if($e->getResponse()) {
+            $this->response = json_decode((string)$e->getResponse()->getBody(),true);
+        }
     }
 
     final public function getResponse()
@@ -321,13 +323,18 @@ trait Siesta
         $data = $data ?: $this->toArray();
 
         $idProperty = self::$siestaConfig["idProperty"];
+        $isNew = !is_null($this->$idProperty);
 
-        $request = self::$client->createRequest('PUT','/' . self::$siestaConfig['endpoint'] . '/' . $this->$idProperty,[
-            'body' => $data,
-            'headers' => [
+        $request = self::$client->createRequest(
+            ($isNew) ? 'PUT' : 'POST',
+            '/' . self::$siestaConfig['endpoint'] . (($isNew) ? '/' . $this->$idProperty : ''),
+            [
+                'body' => $data,
+                'headers' => [
                     'Content-Type' => 'application/json'
                 ]
-        ]);
+            ]
+        );
 
         $token = self::getSiestaOauthToken($options);
 
@@ -492,7 +499,7 @@ trait Siesta
             return $options['token'];
         } else if (isset($_SESSION) && array_key_exists(self::$config['tokenField'],$_SESSION)) {
             return $_SESSION[self::$config['tokenField']];
-        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::get(self::$siestaConfig['tokenField'])) {
+        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::has(self::$siestaConfig['tokenField'])) {
             return \Session::get(self::$siestaConfig['tokenField']);
         } else {
             return null;
