@@ -240,7 +240,7 @@ trait Siesta
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
 
         $request = self::$client->createRequest('POST','/' . $endpoint,[
-            'body' => $data,
+            'body' => json_encode($data),
             'headers' => [
                     'Content-Type' => 'application/json'
                 ]
@@ -323,13 +323,12 @@ trait Siesta
         $data = $data ?: $this->toArray();
 
         $idProperty = self::$siestaConfig["idProperty"];
-        $isNew = !is_null($this->$idProperty);
-
+        $isNew = !isset($this->$idProperty);
         $request = self::$client->createRequest(
-            ($isNew) ? 'PUT' : 'POST',
-            '/' . self::$siestaConfig['endpoint'] . (($isNew) ? '/' . $this->$idProperty : ''),
+            (!$isNew) ? 'PUT' : 'POST',
+            '/' . self::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
             [
-                'body' => $data,
+                'body' => json_encode($data),
                 'headers' => [
                     'Content-Type' => 'application/json'
                 ]
@@ -365,9 +364,13 @@ trait Siesta
 
         }
 
+        if($isNew && array_key_exists(self::$siestaConfig["idField"],$result)) {
+            $this->$idProperty = $result[self::$siestaConfig["idField"]];
+        }
+
         foreach ($result as $key => $value) {
-            if(array_key_exists($key,$data)) {
-                $this->$key = $result[$key];
+            if(property_exists($this,$key)) {
+                $this->setValue($key, $result[$key]);
             }
         }
 
@@ -436,6 +439,11 @@ trait Siesta
         return get_object_vars($this);
     }
 
+    public function setValue($property, $value)
+    {
+        $this->$property = $value;
+    }
+
     /**************************
      * Private Static Methods *
      **************************/
@@ -450,6 +458,7 @@ trait Siesta
             "url" => null,
             "endpoint" => "",
             "idProperty" => "id",
+            "idField" => "_id",
             "resultField" => "result",
             "tokenField" => 'SIESTA_OAUTH_TOKEN',
             "requestContentType" => "application/json"
