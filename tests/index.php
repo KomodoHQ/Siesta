@@ -40,7 +40,7 @@ if (preg_match('/^\/users\/([0-9]+)$/', $_SERVER["REQUEST_URI"],$matches)) {
 			output($users[$matches[1]]);
 			break;
 		case 'put':
-			parse_str(file_get_contents('php://input'),$putVars);
+			$putVars = json_decode(file_get_contents('php://input'),true);
 
 			foreach ($putVars as $field => $value) {
 				if (array_key_exists($field,$users[$matches[1]]))
@@ -77,7 +77,7 @@ if (preg_match('/^\/users\/([0-9]+)$/', $_SERVER["REQUEST_URI"],$matches)) {
 			output($results);
 			break;
 		case 'post':
-			$users[] = $_POST;
+			$users[] = json_decode(file_get_contents('php://input'),true);
 			$users[count($users)-1]["id"] = (int)$users[count($users)-1]["id"];
 			$_SESSION['users'] = $users;
 			output($users[count($users)-1]);
