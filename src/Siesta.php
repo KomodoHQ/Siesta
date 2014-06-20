@@ -78,7 +78,7 @@ trait Siesta
      */
     public static function populate($item)
     {
-        return new self($item);
+        return new static($item);
     }
 
     /**
