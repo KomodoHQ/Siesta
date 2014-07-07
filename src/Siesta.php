@@ -101,7 +101,7 @@ trait Siesta
 
         $items = [];
 
-        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
+        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
         $request = self::$client->createRequest('GET','/' . $endpoint,[
                 'query' => $queryParams
@@ -181,7 +181,7 @@ trait Siesta
             self::siestaSetup();
         }
 
-        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
+        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
         $request = self::$client->createRequest('GET','/' . $endpoint . '/'  . (string)$id);
 
@@ -237,7 +237,7 @@ trait Siesta
             self::siestaSetup();
         }
 
-        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : self::$siestaConfig['endpoint'];
+        $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
         $request = self::$client->createRequest('POST','/' . $endpoint,[
             'body' => json_encode($data),
@@ -322,11 +322,12 @@ trait Siesta
 
         $data = $data ?: $this->toArray();
 
-        $idProperty = self::$siestaConfig["idProperty"];
+        $idProperty = static::$siestaConfig["idProperty"];
         $isNew = !isset($this->$idProperty);
+        \Log::info(static::$siestaConfig);
         $request = self::$client->createRequest(
             (!$isNew) ? 'PUT' : 'POST',
-            '/' . self::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
+            '/' . static::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
             [
                 'body' => json_encode($data),
                 'headers' => [
@@ -340,6 +341,7 @@ trait Siesta
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
         }
+
 
         /*
          * If GuzzleHttp Exceptions occur, convert them to Siesta exceptions, better for future
@@ -364,12 +366,13 @@ trait Siesta
 
         }
 
-        if($isNew && array_key_exists(self::$siestaConfig["idField"],$result)) {
-            $this->$idProperty = $result[self::$siestaConfig["idField"]];
+        if($isNew && array_key_exists(static::$siestaConfig["idField"],$result)) {
+            $this->$idProperty = $result[static::$siestaConfig["idField"]];
         }
 
         foreach ($result as $key => $value) {
             if(property_exists($this,$key)) {
+                \Log::info('SETTING ' . $key . ' to ' . json_encode($result[$key]));
                 $this->setValue($key, $result[$key]);
             }
         }
@@ -394,8 +397,8 @@ trait Siesta
             self::siestaSetup();
         }
 
-        $idProperty = self::$siestaConfig["idProperty"];
-        $request = self::$client->createRequest('DELETE','/' . self::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
+        $idProperty = static::$siestaConfig["idProperty"];
+        $request = self::$client->createRequest('DELETE','/' . static::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
 
         $token = self::getSiestaOauthToken($options);
 
@@ -454,7 +457,7 @@ trait Siesta
      */
     private static function siestaSetup()
     {
-        self::$siestaConfig = array_merge([
+        static::$siestaConfig = array_merge([
             "url" => null,
             "endpoint" => "",
             "idProperty" => "id",
@@ -462,22 +465,22 @@ trait Siesta
             "resultField" => "result",
             "tokenField" => 'SIESTA_OAUTH_TOKEN',
             "requestContentType" => "application/json"
-        ],self::$siestaConfig ?: []);
+        ],static::$siestaConfig ?: []);
 
-        if (!self::$siestaConfig["url"]) {
+        if (!static::$siestaConfig["url"]) {
 
             /**
              * If we're in Laravel environment get the url from the Config. Workaround for PHP's
              * inadequate closure implementation
              */
             if(class_exists('Config') && is_callable(['\Config','get']) && \Config::get('api.url')) {
-                self::$siestaConfig["url"] = \Config::get('api.url');
+                static::$siestaConfig["url"] = \Config::get('api.url');
             } else {
                 throw new Exception("You Must Specify A URL For The API!");
             }
         }
 
-        self::$client = new GuzzleHttp\Client(["base_url" => self::$siestaConfig["url"]]);
+        self::$client = new GuzzleHttp\Client(["base_url" => static::$siestaConfig["url"]]);
 
     }
 
@@ -492,7 +495,7 @@ trait Siesta
     {
         $obj = json_decode((string)$response->getBody(),true);
 
-        return (self::$siestaConfig["resultField"]) ? $obj[self::$siestaConfig["resultField"]] : $obj;
+        return (static::$siestaConfig["resultField"]) ? $obj[static::$siestaConfig["resultField"]] : $obj;
     }
 
     /**
@@ -508,8 +511,8 @@ trait Siesta
             return $options['token'];
         } else if (isset($_SESSION) && array_key_exists(self::$config['tokenField'],$_SESSION)) {
             return $_SESSION[self::$config['tokenField']];
-        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::has(self::$siestaConfig['tokenField'])) {
-            return \Session::get(self::$siestaConfig['tokenField']);
+        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::has(static::$siestaConfig['tokenField'])) {
+            return \Session::get(static::$siestaConfig['tokenField']);
         } else {
             return null;
         }
