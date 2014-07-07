@@ -324,7 +324,7 @@ trait Siesta
 
         $idProperty = static::$siestaConfig["idProperty"];
         $isNew = !isset($this->$idProperty);
-        \Log::info(static::$siestaConfig);
+
         $request = self::$client->createRequest(
             (!$isNew) ? 'PUT' : 'POST',
             '/' . static::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
@@ -372,7 +372,6 @@ trait Siesta
 
         foreach ($result as $key => $value) {
             if(property_exists($this,$key)) {
-                \Log::info('SETTING ' . $key . ' to ' . json_encode($result[$key]));
                 $this->setValue($key, $result[$key]);
             }
         }
