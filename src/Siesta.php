@@ -61,7 +61,7 @@ trait Siesta
     /**
      * Stores the GuzzleHttp\Client instance used for all requests.
      */
-    private static $client;
+    protected static $client;
 
 
     /*************************
@@ -95,19 +95,22 @@ trait Siesta
      */
     public static function find($queryParams = [], $options = [])
     {
-        if (!self::$client) {
-            self::siestaSetup();
+
+        static::siestaSetup();
+
+        if (!static::$client) {
+            static::initClient();
         }
 
         $items = [];
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = self::$client->createRequest('GET','/' . $endpoint,[
+        $request = static::$client->createRequest('GET','/' . $endpoint,[
                 'query' => $queryParams
             ]);
 
-        $token = self::getSiestaOauthToken($options);
+        $token = static::getSiestaOauthToken($options);
 
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
@@ -119,8 +122,8 @@ trait Siesta
          */
         try {
 
-            $response = self::$client->send($request);
-            $results = self::siestaReadBody($response);
+            $response = static::$client->send($request);
+            $results = static::siestaReadBody($response);
 
         } catch (ClientException $e) {
 
@@ -137,7 +140,7 @@ trait Siesta
         }
 
         foreach ($results as $result) {
-            $items[] = self::populate($result);
+            $items[] = static::populate($result);
         }
 
         return $items;
@@ -159,7 +162,7 @@ trait Siesta
     {
         $queryParams['limit'] = 1;
 
-        $results = self::find($queryParams,$options);
+        $results = static::find($queryParams,$options);
 
         return (count($results) >= 1) ? $results[0] : null;
     }
@@ -177,15 +180,17 @@ trait Siesta
      */
     public static function findById($id, $options = [])
     {
-        if (!self::$client) {
-            self::siestaSetup();
+        static::siestaSetup();
+
+        if (!static::$client) {
+            static::initClient();
         }
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = self::$client->createRequest('GET','/' . $endpoint . '/'  . (string)$id);
+        $request = static::$client->createRequest('GET','/' . $endpoint . '/'  . (string)$id);
 
-        $token = self::getSiestaOauthToken($options);
+        $token = static::getSiestaOauthToken($options);
 
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
@@ -197,8 +202,8 @@ trait Siesta
          */
         try {
 
-            $response = self::$client->send($request);
-            $result = self::siestaReadBody($response);
+            $response = static::$client->send($request);
+            $result = static::siestaReadBody($response);
 
         } catch (ClientException $e) {
 
@@ -214,7 +219,7 @@ trait Siesta
 
         }
 
-        return ($result) ? self::populate($result) : null;
+        return ($result) ? static::populate($result) : null;
 
     }
 
@@ -233,20 +238,22 @@ trait Siesta
      */
     public static function create($data, $options = [])
     {
-        if (!self::$client) {
-            self::siestaSetup();
+        static::siestaSetup();
+
+        if (!static::$client) {
+            static::initClient();
         }
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = self::$client->createRequest('POST','/' . $endpoint,[
+        $request = static::$client->createRequest('POST','/' . $endpoint,[
             'body' => json_encode($data),
             'headers' => [
                     'Content-Type' => 'application/json'
                 ]
         ]);
 
-        $token = self::getSiestaOauthToken($options);
+        $token = static::getSiestaOauthToken($options);
 
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
@@ -258,8 +265,8 @@ trait Siesta
          */
         try {
 
-            $response = self::$client->send($request);
-            $result = self::siestaReadBody($response);
+            $response = static::$client->send($request);
+            $result = static::siestaReadBody($response);
 
         } catch (ClientException $e) {
 
@@ -275,7 +282,7 @@ trait Siesta
 
         }
 
-        return new self($result);
+        return static::populate($result);
 
     }
 
@@ -316,16 +323,17 @@ trait Siesta
      */
     public function save($data = null,$options = [])
     {
-        if (!self::$client) {
-            self::siestaSetup();
+        static::siestaSetup();
+
+        if (!static::$client) {
+            static::initClient();
         }
 
         $data = $data ?: $this->toArray();
 
         $idProperty = static::$siestaConfig["idProperty"];
         $isNew = !isset($this->$idProperty);
-
-        $request = self::$client->createRequest(
+        $request = static::$client->createRequest(
             (!$isNew) ? 'PUT' : 'POST',
             '/' . static::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
             [
@@ -336,7 +344,7 @@ trait Siesta
             ]
         );
 
-        $token = self::getSiestaOauthToken($options);
+        $token = static::getSiestaOauthToken($options);
 
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
@@ -349,8 +357,8 @@ trait Siesta
          */
         try {
 
-            $response = self::$client->send($request);
-            $result = self::siestaReadBody($response);
+            $response = static::$client->send($request);
+            $result = static::siestaReadBody($response);
 
         } catch (ClientException $e) {
 
@@ -392,14 +400,16 @@ trait Siesta
     public function delete($options = [])
     {
 
-        if (!self::$client) {
-            self::siestaSetup();
+        static::siestaSetup();
+
+        if (!static::$client) {
+            static::initClient();
         }
 
         $idProperty = static::$siestaConfig["idProperty"];
-        $request = self::$client->createRequest('DELETE','/' . static::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
+        $request = static::$client->createRequest('DELETE','/' . static::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
 
-        $token = self::getSiestaOauthToken($options);
+        $token = static::getSiestaOauthToken($options);
 
         if ($token) {
             $request->setHeader('Authorization','Bearer ' . $token);
@@ -411,7 +421,7 @@ trait Siesta
          */
         try {
 
-            $response = self::$client->send($request);
+            $response = static::$client->send($request);
 
         } catch (ClientException $e) {
 
@@ -427,7 +437,7 @@ trait Siesta
 
         }
 
-        return self::siestaReadBody($response);
+        return static::siestaReadBody($response);
 
     }
 
@@ -454,7 +464,7 @@ trait Siesta
      * Sets up the GuzzleHttp\Client instance and extends the default config with the new values
      * specified in the class.
      */
-    private static function siestaSetup()
+    protected static function siestaSetup()
     {
         static::$siestaConfig = array_merge([
             "url" => null,
@@ -465,7 +475,10 @@ trait Siesta
             "tokenField" => 'SIESTA_OAUTH_TOKEN',
             "requestContentType" => "application/json"
         ],static::$siestaConfig ?: []);
+    }
 
+    protected static function initClient()
+    {
         if (!static::$siestaConfig["url"]) {
 
             /**
@@ -479,8 +492,7 @@ trait Siesta
             }
         }
 
-        self::$client = new GuzzleHttp\Client(["base_url" => static::$siestaConfig["url"]]);
-
+        static::$client = new GuzzleHttp\Client(["base_url" => static::$siestaConfig["url"]]);
     }
 
     /**
@@ -490,7 +502,7 @@ trait Siesta
      *
      * @return array The results of the request
      */
-    private static function siestaReadBody($response)
+    protected static function siestaReadBody($response)
     {
         $obj = json_decode((string)$response->getBody(),true);
 
@@ -504,14 +516,15 @@ trait Siesta
      *
      * @return string|null The OAuth Token to use for the request
      */
-    private static function getSiestaOauthToken($options = [])
+    protected static function getSiestaOauthToken($options = [])
     {
+
         if (array_key_exists('token',$options)) {
             return $options['token'];
-        } else if (isset($_SESSION) && array_key_exists(self::$config['tokenField'],$_SESSION)) {
-            return $_SESSION[self::$config['tokenField']];
         } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::has(static::$siestaConfig['tokenField'])) {
             return \Session::get(static::$siestaConfig['tokenField']);
+        } else if (isset($_SESSION) && array_key_exists(static::$siestaConfig['tokenField'],$_SESSION)) {
+            return $_SESSION[static::$siestaConfig['tokenField']];
         } else {
             return null;
         }
