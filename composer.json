@@ -1,6 +1,6 @@
 {
     "name": "komodohq/siesta",
-    "description": "REST API Consumption Wrapper for PHP",
+    "description": "Traits mixing for consuming REST APIs",
     "authors": [
         {
             "name": "Will McKenzie",
