@@ -1,0 +1,12 @@
+language: php
+php:
+    - 5.5
+    - 5.4
+install:
+    - composer install
+before_script:
+    - php -S localhost:9999 ./tests/index.php &
+script:
+    - bin/behat
+after_script:
+    - kill $(ps aux | grep '[l]ocalhost:9999' | awk '{print $2}')
