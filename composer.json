@@ -1,6 +1,7 @@
 {
     "name": "komodohq/siesta",
     "description": "Traits mixing for consuming REST APIs",
+    "license": "MIT",
     "authors": [
         {
             "name": "Will McKenzie",
