@@ -317,7 +317,7 @@ trait Siesta
      */
     public function update($data, $options = [])
     {
-        return $this->save($data,$options);
+        return $this->save($options, $data);
     }
 
     /**
