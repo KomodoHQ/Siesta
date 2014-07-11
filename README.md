@@ -8,14 +8,8 @@ composer.json:
 
 ``` json
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "hg@bitbucket.org/komodohq/komodo-siesta"
-        }
-    ],
     "require": {
-        "komodohq/komodo-siesta": "dev-master"
+        "komodohq/siesta": "dev-master"
     }
 }
 ```
@@ -77,7 +71,7 @@ constructor method.
 ``` php
 public static function populate($item)
 {
-    return new self($item);
+    return new static($item);
 }
 ```
 
