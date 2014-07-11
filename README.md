@@ -226,6 +226,6 @@ If using Laravel you can omit the URL config variable for Siesta and it will loo
 
 ## TODO
 
-* Error Handling
+* Improve Error Handling
 * More Tests
 * Tidy up tests
