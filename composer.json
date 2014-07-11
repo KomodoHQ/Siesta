@@ -1,6 +1,8 @@
 {
     "name": "komodohq/siesta",
     "description": "Traits mixing for consuming REST APIs",
+    "homepage": "http://github.com/KomodoHQ/Siesta",
+    "keywords": ["REST", "API"],
     "license": "MIT",
     "authors": [
         {
