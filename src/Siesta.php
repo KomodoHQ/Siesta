@@ -17,7 +17,16 @@ class SiestaGeneralException extends \Exception
      */
     protected $response;
 
-    public function __construct($message = null, $code = 0, $e = null)
+    /**
+     * Extends the built in Exception constructor to set the response property to the value of
+     * the HTTP response body.
+     *
+     * @param  string $message =             "" The error message
+     * @param  int $code    =             0    The HTTP Status code
+     * @param  Exception $e       =             null The previous exception
+     * @return SiestaGeneralException          The newly created custom Exception
+     */
+    public function __construct($message = "", $code = 0, $e = null)
     {
         parent::__construct($message,$code,$e);
         if($e->getResponse()) {
@@ -25,6 +34,9 @@ class SiestaGeneralException extends \Exception
         }
     }
 
+    /**
+     * Returns the associative array representing the JSON response body.
+     */
     final public function getResponse()
     {
         return $this->response;
@@ -321,7 +333,7 @@ trait Siesta
      *
      * @return class The current instance of the class.
      */
-    public function save($data = null,$options = [])
+    public function save($options = [], $data = null)
     {
         static::siestaSetup();
 
@@ -380,7 +392,7 @@ trait Siesta
 
         foreach ($result as $key => $value) {
             if(property_exists($this,$key)) {
-                $this->setValue($key, $result[$key]);
+                $this->$key = $result[$key];
             }
         }
 
@@ -451,11 +463,6 @@ trait Siesta
         return get_object_vars($this);
     }
 
-    public function setValue($property, $value)
-    {
-        $this->$property = $value;
-    }
-
     /**************************
      * Private Static Methods *
      **************************/
@@ -521,7 +528,11 @@ trait Siesta
 
         if (array_key_exists('token',$options)) {
             return $options['token'];
-        } else if (class_exists('Session') && is_callable(['\Session','get']) && \Session::has(static::$siestaConfig['tokenField'])) {
+        } else if (
+                    class_exists('Session') &&
+                    is_callable(['\Session','get']) &&
+                    \Session::has(static::$siestaConfig['tokenField'])
+                ) {
             return \Session::get(static::$siestaConfig['tokenField']);
         } else if (isset($_SESSION) && array_key_exists(static::$siestaConfig['tokenField'],$_SESSION)) {
             return $_SESSION[static::$siestaConfig['tokenField']];
