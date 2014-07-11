@@ -2,6 +2,9 @@
 
 Easily add API Consumption to your PHP Classes.
 
+Siesta will add methods to consume your JSON REST API and convert the results to instances of your
+PHP models.
+
 ## Installation
 
 composer.json:
@@ -24,7 +27,7 @@ $ composer install
 
 class User {
 
-    use Siesta;
+    use Siesta\Siesta;
 
     private static $siestaConfig = [
             "url" => "http://localhost:9999",
@@ -41,6 +44,102 @@ class User {
 $users = User::find();
 
 ```
+
+## Methods
+
+### `Siesta::find`
+
+``` php
+User::find([$queryParams[, $options]]);
+
+User::find();
+User::find(["username" => "OiNutter"]);
+User::find(["username" => "OiNutter"], ["endpoint" => "administrators"]);
+```
+
+Performs a GET request to `/<endpoint>` that returns a collection of items matching the supplied
+query parameters.
+
+NB. This method is also used by the findOne method so be aware if you override this method it will
+also affect that method.
+
+### `Siesta::findOne`
+
+``` php
+User::findOne([$queryParams[, options]]);
+
+User:find();
+User::findOne(["username" => "OiNutter"]);
+User::findOne(["username" => "OiNutter"], ["endpoint" => "administrators"]);
+```
+
+Performs a GET request to `/{{endpoint}}/{{this->id}}` and returns the first result to match the supplied query parameters. Sets an
+additional `limit` parameter to 1 so if the API being consumed supports that it will limit the amount
+of responses returned and save work on your end.
+
+### `Siesta::findById`
+
+``` php
+User::findById($id[, $options]);
+
+User::findById(1);
+User::findById(1, ["endpoint" => "administrators"]);
+```
+
+Performs a GET request to `/{{endpoint}}/{{this->id}}` and returns a single result with the matching id.
+
+### `Siesta::create`
+
+``` php
+User::create($data[, $options]);
+
+User::create(["username" => "Bob", "email" => "bob@komododigital.co.uk"]);
+User::create(
+    ["username" => "Bob", "email" => "bob@komododigital.co.uk"],
+    ["endpoint" => "administrators"]
+);
+```
+
+Performs a POST request to `/{{endpoint}}` with the supplied data and returns the newly created resource.
+
+### `$siestaItem->update`
+
+``` php
+$user->update($data[, $options]);
+
+$user->update(["location" => "Newcastle Upon Tyne"]);
+$user->update(["location" => "Newcastle Upon Tyne"], ["endpoint" => "administrators"]);
+```
+
+Performs a PUT request to `/{{endpoint}}/{{this->id}}` with the supplied data and returns the updated
+resource. It will also update the local resource with any fields that have been updated on the server.
+
+### `$siestaItem->save`
+
+``` php
+$user->save([$options]);
+
+$user->save();
+$user->save(["endpoint" => "administrators"]);
+```
+
+Performs a PUT request to `/{{endpoint}}/{{this->id}}` with the current resource and returns the updated
+resource. It will also update the local resource with any fields that have been updated on the server.
+
+NB. This method is also used by the update method so be aware if you override this method it will
+also affect that method.
+
+### `$siestaItem->delete()`
+
+``` php
+$user->delete([$options]);
+
+$user->delete(["endpoint" => "administarots"]);
+```
+
+Performs a DELETE request to `/{{endpoint}}/{{this->id}}` and returns an associative array representing
+the HTTP response body returned from the server.
+
 
 ## Customisation
 
@@ -101,6 +200,29 @@ public function toArray()
 
 but you can override that to provide your own serialisation.
 
+## Exceptions
+
+### `SiestaGeneralException`
+
+Base class for any general exceptions. Stores the response body which can be retrieved like so:
+
+``` php
+$e->getResponse();
+```
+
+### `SiestaClientException`
+
+Exception class for HTTP error codes in the 400 range. Extends `SiestaGeneralException`.
+
+### `SiestaServerException`
+
+Exception class for HTTP error codes in the 500 range. Extends `SiestaGeneralException`.
+
+
+## Laravel
+
+If using Laravel you can omit the URL config variable for Siesta and it will look for
+`Config::get('api.url')` instead.
 
 ## TODO
 
