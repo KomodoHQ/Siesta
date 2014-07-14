@@ -73,7 +73,7 @@ User::findOne(["username" => "OiNutter"]);
 User::findOne(["username" => "OiNutter"], ["endpoint" => "administrators"]);
 ```
 
-Performs a GET request to `/{{endpoint}}/{{this->id}}` and returns the first result to match the supplied query parameters. Sets an
+Performs a GET request to `/{{endpoint}}` and returns the first result to match the supplied query parameters. Sets an
 additional `limit` parameter to 1 so if the API being consumed supports that it will limit the amount
 of responses returned and save work on your end.
 
@@ -123,8 +123,12 @@ $user->save();
 $user->save(["endpoint" => "administrators"]);
 ```
 
-Performs a PUT request to `/{{endpoint}}/{{this->id}}` with the current resource and returns the updated
-resource. It will also update the local resource with any fields that have been updated on the server.
+Performs a PUT request to `/{{endpoint}}/{{this->id}}` with the current resource and returns the
+updated resource. It will also update the local resource with any fields that have been updated on
+the server.
+
+If the resource has not already been saved to the server (doesn't have an id set) this method will
+perform a POST request instead. The local object will then be updated with the newly created id.
 
 NB. This method is also used by the update method so be aware if you override this method it will
 also affect that method.
