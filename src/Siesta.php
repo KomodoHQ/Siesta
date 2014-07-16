@@ -392,7 +392,7 @@ trait Siesta
 
         foreach ($result as $key => $value) {
             if(property_exists($this,$key)) {
-                $this->$key = $result[$key];
+                $this->setValue($key, $result[$key]);
             }
         }
 
@@ -461,6 +461,11 @@ trait Siesta
     public function toArray()
     {
         return get_object_vars($this);
+    }
+
+    public function setValue($property, $value)
+    {
+        $this->$property = $value;
     }
 
     /**************************

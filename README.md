@@ -192,7 +192,7 @@ public static function populate($item)
 
 ### `Siesta->toArray`
 
-Siesta adds a `private` `toArray` method to your class. This is used to serialize the class for
+Siesta adds a `public` `toArray` method to your class. This is used to serialize the class for
 sending in a save request. The default merely calls `get_object_vars` on itself, like so:
 
 ``` php
@@ -203,6 +203,32 @@ public function toArray()
 ```
 
 but you can override that to provide your own serialisation.
+
+
+### `Siesta->setValue`
+
+Siesta adds a `public` `setValue` method which is used by the update and save methods to update
+properties based on the response from the server. The default just sets the property to the value.
+
+``` php
+public function setValue($property, $value)
+{
+    $this->$property = $value;
+}
+```
+
+You can override this to perform any extra manipulation on the properties before setting them.
+
+``` php
+public function setValue($property, $value)
+{
+    if ($property == 'registered') {
+        $this->$property = strtotime($value);
+    } else {
+        $this->$property = $value;
+    }
+}
+```
 
 ## Exceptions
 
