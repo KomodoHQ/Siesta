@@ -259,3 +259,31 @@ If using Laravel you can omit the URL config variable for Siesta and it will loo
 * Improve Error Handling
 * More Tests
 * Tidy up tests
+
+## Tests
+
+Run `composer install` to get the testing library.
+
+Start the test API server
+
+```
+$ php -S localhost:9999 ./tests/index.php
+```
+
+Run the tests
+
+```
+$ bin\behat
+```
+
+## Contributing
+
+* Code should conform to [PSR 2 Coding Standards](http://www.php-fig.org/psr/psr-2/).
+* Keep pull requests to significant changes and additions. Minor typos and documentation additions
+should just be raised as issues.
+* Ensure all unit tests pass, and if adding new functionality add unit tests for it and make sure
+they pass.
+* We may not always accept pull requests if we feel they don't they are in line with the aims of the
+library or if we don't feel they add significant benefit. We will always try and explain our
+reasoning and are prepared to be convinced otherwise.
+* Keep it polite ;)
