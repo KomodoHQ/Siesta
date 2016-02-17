@@ -118,7 +118,7 @@ trait Siesta
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = static::$client->createRequest('GET','/' . $endpoint,[
+        $request = static::$client->createRequest('GET', $endpoint,[
                 'query' => $queryParams
             ]);
 
@@ -200,7 +200,7 @@ trait Siesta
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = static::$client->createRequest('GET','/' . $endpoint . '/'  . (string)$id);
+        $request = static::$client->createRequest('GET', $endpoint . '/'  . (string)$id);
 
         $token = static::getSiestaOauthToken($options);
 
@@ -258,7 +258,7 @@ trait Siesta
 
         $endpoint = (array_key_exists('endpoint',$options)) ? $options['endpoint'] : static::$siestaConfig['endpoint'];
 
-        $request = static::$client->createRequest('POST','/' . $endpoint,[
+        $request = static::$client->createRequest('POST', $endpoint,[
             'body' => json_encode($data),
             'headers' => [
                     'Content-Type' => 'application/json'
@@ -347,7 +347,7 @@ trait Siesta
         $isNew = !isset($this->$idProperty);
         $request = static::$client->createRequest(
             (!$isNew) ? 'PUT' : 'POST',
-            '/' . static::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
+            static::$siestaConfig['endpoint'] . ((!$isNew) ? '/' . $this->$idProperty : ''),
             [
                 'body' => json_encode($data),
                 'headers' => [
@@ -419,7 +419,7 @@ trait Siesta
         }
 
         $idProperty = static::$siestaConfig["idProperty"];
-        $request = static::$client->createRequest('DELETE','/' . static::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
+        $request = static::$client->createRequest('DELETE', static::$siestaConfig['endpoint'] . '/' . $this->$idProperty);
 
         $token = static::getSiestaOauthToken($options);
 
